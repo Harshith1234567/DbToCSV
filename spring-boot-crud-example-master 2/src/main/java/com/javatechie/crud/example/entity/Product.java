@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
+//@NoArgsConstructor
 @Entity
 @Table(name = "product")
 public class Product {
@@ -22,4 +22,6 @@ public class Product {
     private String name;
     private int quantity;
     private int price;
+    
+    public Product() {}
 }

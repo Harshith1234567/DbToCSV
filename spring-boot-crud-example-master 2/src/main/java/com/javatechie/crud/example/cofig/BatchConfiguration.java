@@ -18,10 +18,12 @@ import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.core.RowMapper;
 
 import com.javatechie.crud.example.entity.Product;
+import com.javatechie.crud.example.processor.ProProcessor;
 
 @Configuration
 @EnableBatchProcessing
@@ -61,24 +63,41 @@ public class BatchConfiguration {
 	  @Bean
 	  public FlatFileItemWriter<Product> writer(){
 		  FlatFileItemWriter<Product> writer=new FlatFileItemWriter<Product>();
-		  writer.setResource(new FileSystemResource("/Users/harshith.sr/Documents/Book2.csv"));
+		  writer.setResource(new FileSystemResource("C://Users/DELL/Documents/output_csv.csv"));
+//		  writer.setResource(new FileSystemResource("C:/Users/DELL/Documents/output_csv.csv"));
+//		  writer.setResource(new FileSystemResource("C:\Users\DEL\Documents\output_csv.csv"));
+//		  writer.setResource(new FileSystemResource("/cygdrive/c/Users/DELL/Documents/output_csv.csv"));
+//		  writer.setResource(new FileSystemResource("/cygdrive/C/Users/DELL/Documents/output_csv.csv"));
+
+//		  writer.setResource(new ClassPathResource("products.csv"));
 		  DelimitedLineAggregator<Product> aggregator=new DelimitedLineAggregator<>();
 		  BeanWrapperFieldExtractor<Product> fieldExtractor=new BeanWrapperFieldExtractor<>();
 		  fieldExtractor.setNames(new String[] {"id","name","quantity","price"});
 		  aggregator.setFieldExtractor(fieldExtractor);
 		  writer.setLineAggregator(aggregator);
+		  System.out.println("1");
 		  return writer;
 		  
 	  }
 	  
 	  @Bean
 	  public Step executeStep() {
-		  return stepBuilderFactory.get("executeStep").<Product,Product>chunk(10).reader(reader()).writer(writer()).build();
+		  System.out.println("2");
+		  return stepBuilderFactory.get("executeStep").<Product,Product>chunk(10).reader(reader()).processor(new ProProcessor()).writer(writer()).build();
 		  
 	  }
-//	   
+	   
+	  @Bean
+	  public Job processJob() {
+		  return jobBuilderFactory.get("processJob").incrementer(new RunIdIncrementer()).flow(executeStep()).end().build();
+	  }
+	  
 //	  @Bean
-//	  public Job processJob() {
-//		  return jobBuilderFactory.get("processJob").incrementer(new RunIdIncrementer()).flow(executeStep()).end().build();
+//	  public Job exportUserJob() {
+//	   return jobBuilderFactory.get("processJob")
+//	     .incrementer(new RunIdIncrementer())
+//	     .flow(executeStep())
+//	     .end()
+//	     .build();
 //	  }
 }
